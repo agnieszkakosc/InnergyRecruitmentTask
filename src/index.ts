@@ -7,29 +7,26 @@ export const updateSelectedServices = (
 ) => {
     switch (action.type) {
         case "Select":
-            if (action.service == "BlurayPackage" && !previouslySelectedServices.includes("VideoRecording")){
-                return previouslySelectedServices;
-            }
-            if (action.service == "TwoDayEvent" && !previouslySelectedServices.includes("Photography") 
-                && !previouslySelectedServices.includes("VideoRecording")){
-                return previouslySelectedServices;
-            }
-            return previouslySelectedServices.filter(service => service !== action.service).concat(action.service);
-    
+            return applySelectedServicesRules(previouslySelectedServices
+                .filter(service => service !== action.service)
+                .concat(action.service));
         case "Deselect":
-            if (action.service == "VideoRecording") {
-                if (!previouslySelectedServices.includes("Photography")){
-                    return previouslySelectedServices.filter(service => service !== action.service 
-                        && service !== "BlurayPackage" 
-                        && service !== "TwoDayEvent");
-                }
-                return previouslySelectedServices.filter(service => service !== action.service && service !== "BlurayPackage");
-            }
-            if (action.service == "Photography" && !previouslySelectedServices.includes("VideoRecording")){
-                return previouslySelectedServices.filter(service => service !== action.service && service !== "TwoDayEvent");
-            }
-            return previouslySelectedServices.filter(service => service !== action.service);
+            return applySelectedServicesRules(previouslySelectedServices
+                .filter(service => service !== action.service));
     } 
+}
+
+const applySelectedServicesRules = (selectedServices: ServiceType[]): ServiceType[] => {
+    if (selectedServices.includes("BlurayPackage") 
+        && !selectedServices.includes("VideoRecording")) {
+        return selectedServices.filter(s => s !== "BlurayPackage");
+    }
+    if (selectedServices.includes("TwoDayEvent") 
+        && !selectedServices.includes("Photography") 
+        && !selectedServices.includes("VideoRecording")) {
+        return selectedServices.filter(s => s !== "TwoDayEvent");
+    }
+    return selectedServices;
 }
 
 export interface ServicePrice {
@@ -91,7 +88,7 @@ class PriceListItem {
             .filter(x => otherServices.includes(x[0]))
             .sort((x, y) => x[1] - y[1])
             .pop();
-        if (maxDiscount){
+        if (maxDiscount) {
             return { basePrice: this.price, finalPrice: this.price - maxDiscount[1] };
         }
         return { basePrice: this.price, finalPrice: this.price};
